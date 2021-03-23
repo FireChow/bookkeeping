@@ -1,0 +1,73 @@
+<% include header.ejs %>
+<style>
+body{
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	background: url('../images/cityBg.jpg') no-repeat fixed;
+}
+.pdAt{
+	padding: 50px 80px;
+	margin-top: 200px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: rgba(179, 179, 179, 0.4);
+}
+</style>
+<script type="text/javascript">
+	$(function(){
+		$("#username,#psd").keyup(function(event) {
+			if(event.keyCode == "13"){
+				$("#submit").click();
+			}
+		});
+		$("#submit").click(function(){
+			$("#submit").button('loading');
+			var params ={
+    			username: $("#username").val(),
+    			psd: $("#psd").val()
+    		};
+    		$.post("/login/doLogin", params, function(data, status){
+                if(status){
+                	if(!data.message){
+                		window.location.href = '/';
+                	}
+                	$('#message').html(data.message);
+                	$("#submit").button('reset');
+                }else{
+                    console.log('error');
+                    $("#submit").button('reset');
+                }
+            });
+    		
+		});
+	});
+</script>
+<div class="container">
+	<div class="pdAt wid60P height100P">
+		<table class="table newsDetailTable">
+			<tbody>
+				<tr>
+					<td class="txtRg"><span class="glyphicon glyphicon-user fontSize16 " aria-hidden="true"></span></td>
+					<td colspan="2"><input class="form-control" type="text" id="username" name="username" placeholder="用户名" /></td>
+				</tr>
+				<tr>
+					<td class="txtRg"><span class="glyphicon glyphicon-lock fontSize16" aria-hidden="true"></span></td>
+					<td colspan="2"><input class="form-control" type="password" id="psd" name="psd" placeholder="密码" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td colspan="2"><span id="message" class="colorRed"><%=message%></span></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td colspan="2">
+						<button id="submit" class="btn btn-primary" type="button">登录</button>
+						<button class="btn btn-default" type="button">取消</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<% include footer.ejs %>

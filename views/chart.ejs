@@ -1,0 +1,76 @@
+<% include header.ejs %>
+<script type="text/javascript" src="/javascripts/chart.min.js"></script>
+<div class="container">
+    <div class="contentBgstyle">
+        <select class="dateTypeSelect">
+            <option value="1">日图表</option>
+            <option value="2" selected="selected">月图表</option>
+            <option value="3">年图表</option>
+        </select>
+        <br/>
+        <canvas id="myChart" width="400" height="400"></canvas><br/>
+    </div>
+</div>
+<script type="text/javascript">
+    var listDates = '<%=listDates%>'.split(',');
+    var listMonths = '<%=listMonths%>'.split(',');
+    var listYears = '<%=listYears%>'.split(',');
+    var listDatesDatas = '<%=listDatesDatas%>'.split(',');
+    var listMonthsDatas = '<%=listMonthsDatas%>'.split(',');
+    var listYearsDatas = '<%=listYearsDatas%>'.split(',');
+    $(".dateTypeSelect").change(function() {
+        if ($(this).val() == 1) {
+            init('日消费', listDates, listDatesDatas);
+        }
+        if ($(this).val() == 2) {
+            init('月消费', listMonths, listMonthsDatas);
+        }
+        if ($(this).val() == 3) {
+            init('年消费', listYears, listYearsDatas);
+        }
+    });
+    init('月消费', listMonths, listMonthsDatas);
+    function init(lable, xHeight, yHeight){
+        var ctx = document.getElementById("myChart");
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: xHeight,
+                datasets: [
+                    {
+                        label: lable,
+                        fill: false,
+                        lineTension: 0.1,
+                        backgroundColor: "rgba(75,192,192,0.4)",
+                        borderColor: "rgba(75,192,192,1)",
+                        borderCapStyle: 'butt',
+                        borderDash: [],
+                        borderDashOffset: 0.0,
+                        borderJoinStyle: 'miter',
+                        pointBorderColor: "rgba(75,192,192,1)",
+                        pointBackgroundColor: "#fff",
+                        pointBorderWidth: 1,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                        pointHoverBorderColor: "rgba(220,220,220,1)",
+                        pointHoverBorderWidth: 2,
+                        pointRadius: 1,
+                        pointHitRadius: 10,
+                        data: yHeight,
+                        spanGaps: false,
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+</script>
+<% include footer.ejs %>

@@ -1,0 +1,80 @@
+<% include header.ejs %>
+<script type="text/javascript">
+$(function(){
+	$("input").keyup(function(event) {
+		if(event.keyCode == "13"){
+			$(".addBtn").click();
+		}
+	});
+	$(".addBtn").click(function(){
+		$(".addBtn").button('loading');
+		var familyUsers = [];
+		<%familyUsers.forEach(function(item){%>
+			familyUsers.push({'id':<%=item.id%>,'rate':$("#rate<%=item.id%>").val()});
+		<%});%>
+		var billTypes = $("#billTypes").val();
+		if(billTypes.charAt(billTypes.length - 1) == ';' || billTypes.charAt(billTypes.length - 1) == '；'){
+			billTypes = billTypes.substring(0,billTypes.length - 1);
+		}
+		var params ={
+			familyname: $("#familyname").val(),
+			billTypes: JSON.stringify(billTypes.split(/;|；/g)),
+			familyUsers: JSON.stringify(familyUsers),
+		};
+		$.post("/familyInfo/modifyInfo", params, function(data, status){
+            if(status){
+            	if(!data.message){
+            		$('#message').removeClass('colorRed');
+            		$('#message').addClass('colorGreen');
+            		$('#message').html('修改成功');
+            	}else{
+	            	$('#message').html(data.message);
+            	}
+            	$(".addBtn").button('reset');
+            }else{
+                console.log('error');
+                $(".addBtn").button('reset');
+            }
+        });
+	});
+});
+</script>
+<div class="container">
+	<div class="txtCt">
+		<h1>家庭信息</h1>
+	</div>
+	<div class="tab-content">
+		<div class="form-group">
+			<label for="username">家庭名称</label>
+			<input type="text" class="form-control" name="familyname" id="familyname" placeholder="请输入家庭名称" value="<%=familyInfo[0].name%>">
+		</div>
+		<div class="form-group">
+			<label for="billTypes">种类管理<span class="color9b9">(请用分号分隔)</span></label>
+			<input type="text" class="form-control" name="billTypes" id="billTypes" placeholder="请输入需要添加的种类，用分号分隔" value="<%var j = 1;%><%billTypes.forEach(function(item){%><%=item.name%><%if(j != billTypes.length){%>;<%}%><%j++;%><%});%>">
+		</div>
+		<div class="form-group">
+			<label for="confirmPsd">支付比率</label>
+			<table class="table tableNoBorderTd">
+				<tr class="txtCt">
+					<%familyUsers.forEach(function(item){%>
+						<td><%=item.billname%></td>
+						<td></td>
+					<%});%>
+				</tr>
+				<tr>
+					<%var i = 1;%>
+					<%familyUsers.forEach(function(item){%>
+						<td><input type="number" class="form-control txtCt" name="rate" id="rate<%=item.id%>" value="<%=item.rate%>" readonly="readonly"></td>
+						<td><%if(i != familyUsers.length){%>:<%}%></td>
+						<%i++;%>
+					<%});%>
+				</tr>
+			</table>
+		</div>
+		<div id="message" class="text-center colorRed"><%= message%></div>
+        <div class="text-center">
+			<button type="submit" class="btn btn-primary addBtn">修改</button>
+		</div>
+	</div>
+</div>
+<% include footer.ejs %>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" >
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta charset="UTF-8">
+  <title>记账系统</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-datetimepicker.min.css">
+  <script type="text/javascript" src="/javascripts/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/bootstrap-datetimepicker.min.js"></script>
+  <!--[if lt IE 9]>  
+  <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>  
+  <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>  
+  <![endif]-->
+  <!--[if lte IE 7]>
+  <script>window.location.href='https://support.dmeng.net/upgrade-your-browser.html?referrer='+location.href;</script>
+  <![endif]-->
+  <!--[if lte IE 8]>
+  <script>
+  $(document).ready(function(){
+    $("#updateIE").css("display", "block");
+  });
+  </script>
+  <![endif]-->
+<style>
+body{
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+.nav{background-color: #f6f6f6;}
+.pdAt{
+  padding: 50px 80px;
+  margin-top: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: rgba(179, 179, 179, 0.4);
+}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">记账系统</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li <%if(nav == 'bill'){%>class="active"<%}%>><a href="/">账单列表 <span class="sr-only">(current)</span></a></li>
+        <li <%if(nav == 'chart'){%>class="active"<%}%>><a href="/chart">图表</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <%if(session.user){%>
+        <li class="dropdown padLf20 padRg20">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">欢迎您，<%=session.user%><span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/userInfo">个人设置</a></li>
+            <li><a href="/familyInfo">家庭设置</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/logout">退出登录</a></li>
+          </ul>
+        </li>
+        <%}else{%><a href="/login">登录</a><%}%>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>

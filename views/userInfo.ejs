@@ -1,0 +1,62 @@
+<% include header.ejs %>
+<script type="text/javascript">
+$(function(){
+	$("input").keyup(function(event) {
+		if(event.keyCode == "13"){
+			$(".addBtn").click();
+		}
+	});
+	$(".addBtn").click(function(){
+		$(".addBtn").button('loading');
+		var params ={
+			username: $("#username").val(),
+			billname: $("#billname").val(),
+			psd: $("#psd").val(),
+			confirmPsd: $("#confirmPsd").val(),
+		};
+		$.post("/userInfo/modifyInfo", params, function(data, status){
+            if(status){
+            	if(!data.message){
+            		$('#message').removeClass('colorRed');
+            		$('#message').addClass('colorGreen');
+            		$('#message').html('修改成功');
+            	}else{
+	            	$('#message').html(data.message);
+            	}
+            	$(".addBtn").button('reset');
+            }else{
+                console.log('error');
+                $(".addBtn").button('reset');
+            }
+        });
+	});
+});
+</script>
+<div class="container">
+	<div class="txtCt">
+		<h1>个人信息</h1>
+	</div>
+	<div class="tab-content">
+		<div class="form-group">
+			<label for="username">用户名</label>
+			<input type="text" class="form-control" name="username" id="username" placeholder="请输入用户名" value="<%=result[0].username%>">
+		</div>
+		<div class="form-group">
+			<label for="billname">内部名</label>
+			<input type="text" class="form-control" name="billname" id="billname" placeholder="请输入账单内用的名字(推荐真实姓名)" value="<%=result[0].billname%>">
+		</div>
+		<div class="form-group">
+			<label for="psd">密码</label>
+			<input type="password" class="form-control" name="psd" id="psd" placeholder="请输入密码">
+		</div>
+		<div class="form-group">
+			<label for="confirmPsd">确认密码</label>
+			<input type="password" class="form-control" name="confirmPsd" id="confirmPsd" placeholder="请输入确认密码">
+		</div>
+		<div id="message" class="text-center colorRed"><%= message%></div>
+        <div class="text-center">
+			<button type="submit" class="btn btn-primary addBtn">修改</button>
+		</div>
+	</div>
+</div>
+<% include footer.ejs %>

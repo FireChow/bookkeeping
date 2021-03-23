@@ -1,0 +1,305 @@
+<% include header.ejs %>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.balanceToToday').click(function() {
+			if(window.confirm('你确定已结算至今日的账单？')){
+				window.location.href = '/balanceToToday';
+			}
+			return;
+		});
+		for(var i = 0; i < 10; i++){
+			$('.modifyBill' + i).click(function(){
+				var billId = $(this).attr("id");
+				var params ={
+	    			id: billId,
+	    		};
+	    		$.post("/getBill", params, function(data, status){
+	                if(status){
+	                	$("#modifyModal").modal("toggle");
+	                	$("#billId").val(billId);
+	                	$("#modifyName").val(data.name);
+	                	$("#modifyDescription").val(data.description);
+	                	$("#modifyCharge").val(data.charge);
+	                	$("#modifyCategory").val(data.category);
+	                	$("#modifyDatetimepicker").val(data.billDate.replace(/T/, ' ').replace(/\.(.*)$/g, ''));
+	                }else{
+	                    console.log('error');
+	                }
+	            });
+			});
+		}
+		$('#datetimepicker').datetimepicker({
+			format: 'yyyy-mm-dd hh:ii:ss'
+		});
+		$('#modifyDatetimepicker').datetimepicker({
+			format: 'yyyy-mm-dd hh:ii:ss'
+		});
+		$(function(){
+        $(".pagination").createPage({
+            totalPage: <%=page.getTotalPage()%>,
+            currPage: <%=page.page%>,
+            backFn:function(p){
+                console.log("回调函数：" + p);
+            }
+        });
+    });
+		(function($){
+	    var ms = {
+	        init:function(totalsubpageTmep, args){
+	            return (function(){
+	                ms.fillHtml(totalsubpageTmep, args);
+	                ms.bindEvent(totalsubpageTmep, args);
+	            })();
+	        },
+	        //填充html
+	        fillHtml:function(totalsubpageTmep, args){
+	            return (function(){
+	                totalsubpageTmep = "";
+	                // 页码大于等于4的时候，添加第一个页码元素
+	                if(args.currPage != 1 && args.currPage >= 4 && args.totalPage != 4) {
+	                    	totalsubpageTmep += "<li class=\"previous\"><a href=\"?p=1\"><span aria-hidden=\"true\">&larr;</span> 首页</a></li>";
+	                }
+	                /* 当前页码>4, 并且<=总页码，总页码>5，添加“···”*/
+	                if(args.currPage - 2 > 2 && args.currPage<=args.totalPage && args.totalPage > 5) {
+	                    totalsubpageTmep += "<li class='ali'><a href='javascript:void(0);' class='geraltTb_' data-go='' >…</a></li>";
+	                }
+	                /* 当前页码的前两页 */
+	                var start = args.currPage - 2;
+	                /* 当前页码的后两页 */
+	                var end = args.currPage + 2;
+
+	                if((start > 1 && args.currPage < 4) || args.currPage == 1) {
+	                    end++;
+	                }
+	                if(args.currPage > args.totalPage - 4 && args.currPage >= args.totalPage) {
+	                    start--;
+	                }
+	                for(; start <= end; start++) {
+	                    if(start <= args.totalPage && start >= 1) {
+	                    	if(args.currPage == start){
+			                    	totalsubpageTmep += "<li class=\"active\"><a href=\"?p=" + start + "\">" + start + "</a></li>";
+		                    }else{
+			                    	totalsubpageTmep += "<li><a href=\"?p=" + start + "\">" + start + "</a></li>";
+		                    }
+	                    }
+	                }
+	                if(args.currPage + 2 < args.totalPage - 1 && args.currPage >= 1 && args.totalPage > 5) {
+	                    totalsubpageTmep += "<li class='ali'><a href='javascript:void(0);' class='geraltTb_' data-go='' >…</a></li>";
+	                }
+
+	                if(args.currPage != args.totalPage && args.currPage < args.totalPage - 2 && args.totalPage != 4) {
+	                    	totalsubpageTmep += "<li class=\"next\"><a href=\"?p=<%=page.getTotalPage()%>\">末页 <span aria-hidden=\"true\">&rarr;</span></a></li>";
+	                }
+	                $(".pagination").html(totalsubpageTmep);
+	            })();
+	        },
+	        //绑定事件
+	        bindEvent:function(totalsubpageTmep, args){
+	            return (function(){
+	                totalsubpageTmep.on("click","a.geraltTb_pager", function(event){
+	                    var current = parseInt($(this).text());
+	                    ms.fillHtml(totalsubpageTmep, {"currPage":current, "totalPage":args.totalPage, "turndown":args.turndown});
+	                    if(typeof(args.backFn)=="function"){
+	                        args.backFn(current);
+	                    }
+	                });
+	            })();
+	        }
+	    }
+	    $.fn.createPage = function(options){       
+	        ms.init(this,options);
+	    }
+	})(jQuery);
+	});
+</script>
+<div class="container">
+	<%if(session.userid){%>
+	<div class="text-right">
+	<!-- Button trigger modal -->
+		<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+			添加
+		</button>
+	</div>
+<!-- Create Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<form action="/save" method="post">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">添加</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="name">物品名</label>
+						<input type="text" class="form-control" name="name" id="name" placeholder="输入物品名">
+					</div>
+					<div class="form-group">
+						<label for="description">描述</label>
+						<input type="text" class="form-control" name="description" id="description" placeholder="请选择描述">
+					</div>
+					<div class="form-group">
+						<label for="charge">金额/元</label>
+						<input type="text" class="form-control" name="charge" id="charge" placeholder="请输入金额">
+					</div>
+					<div class="form-group">
+						<label for="category">种类</label>
+						<select name="category" class="form-control" id="category">
+							<option value="">--请选择--</option>
+							<option value="素菜">素菜</option>
+							<option value="肉类">肉类</option>
+							<option value="调料">调料</option>
+							<option value="饮料">饮料</option>
+							<option value="粮油">粮油</option>
+							<option value="水果">水果</option>
+							<option value="厨具">厨具</option>
+							<%billTypes.forEach(function(item){%>
+								<option value="<%=item.name%>"><%=item.name%></option>
+							<%})%>
+							<option value="其它">其它</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="datetimepicker">日期</label>
+						<input type="text" class="form-control form_datatime billDate" name="billDate" id="datetimepicker" value="<%=moment(today).format('YYYY-MM-DD HH:mm:ss')%>" placeholder="请选择日期">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="submit" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<!-- Modify Modal -->
+<div class="modal fade" id="modifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<form action="/modify" method="post">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">修改</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="modifyName">物品名</label>
+						<input type="text" class="form-control" name="name" id="modifyName" placeholder="输入物品名">
+					</div>
+					<div class="form-group">
+						<label for="modifyDescription">描述</label>
+						<input type="text" class="form-control" name="description" id="modifyDescription" placeholder="请选择描述">
+					</div>
+					<div class="form-group">
+						<label for="modifyCharge">金额/元</label>
+						<input type="text" class="form-control" name="charge" id="modifyCharge" placeholder="请输入金额">
+					</div>
+					<div class="form-group">
+						<label for="modifyCategory">种类</label>
+						<select name="category" class="form-control" id="modifyCategory">
+							<option value="">--请选择--</option>
+							<option value="素菜">素菜</option>
+							<option value="肉类">肉类</option>
+							<option value="调料">调料</option>
+							<option value="饮料">饮料</option>
+							<option value="粮油">粮油</option>
+							<option value="水果">水果</option>
+							<option value="厨具">厨具</option>
+							<%billTypes.forEach(function(item){%>
+								<option value="<%=item.name%>"><%=item.name%></option>
+							<%})%>
+							<option value="其它">其它</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="modifyDatetimepicker">日期</label>
+						<input type="text" class="form-control form_datatime" name="billDate" id="modifyDatetimepicker" placeholder="请选择日期">
+					</div>
+					<input type="text" name="billId" id="billId" style="display:none;">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="submit" class="btn btn-primary">修改</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<%}%>
+	<table class="table table-hover">
+		<thead>
+			<th>物品名</th>
+			<th>给钱者</th>
+			<th>描述</th>
+			<th>金额/元</th>
+			<th>种类</th>
+			<th>日期</th>
+			<th>状态</th>
+			<%if(session.userid){%><th>操作</th><%}%>
+		</thead>
+		<tbody>
+		<%var i = 0;%>
+		<%results.forEach(function(item){%>
+			<tr>
+				<td><%=item.name%></td>
+				<td><%=item.charger%></td>
+				<td><%=item.description%></td>
+				<td><%=item.charge%></td>
+				<td><%=item.category%></td>
+				<td><%=moment(item.billDate).format('YYYY/MM/DD HH:mm:ss')%></td>
+				<td><%if(item.state){%>已结算<%}else{%>未结算<%}%></td>
+				<%if(session.userid){%>
+					<td>
+						<div class="btn-group">
+							<a href="#" class="btn btn-default btn-xs">操作</a>
+							<a href="#" class="btn btn-default btn-xs btn-group-xs" data-toggle="dropdown"><span class="caret"></span></a>
+							<ul class="dropdown-menu">
+							<%if(session.userid == item.userId && item.state == 0){%><li><a id="<%=item.id%>" class="modifyBill<%=i%>" href="javascript:;"><span class="glyphicon glyphicon-pencil" aria-hidden="true">修改</span></a></li><%}%>
+							<%if(session.userid != item.userId && item.state == 0){%><li><a href="/bill?id=<%=item.id%>" onclick="return confirm('确定要结账吗？')"><span class="glyphicon glyphicon-usd" aria-hidden="true">结账</span></a></li><%}%>
+							<%if(session.userid == item.userId && item.state == 0){%><li><a href="/deleteBill?id=<%=item.id%>" onclick="return confirm('确定要删除吗？')"><span class="glyphicon glyphicon-trash" aria-hidden="true">删除</span></a></li><%}%>
+						</ul>
+						</div>
+					</td>
+				<%}%>
+			</tr>
+			<%i++;%>
+			<%})%>
+		</tbody>
+	</table>
+	<div class="text-left">
+		<span>未结算总消费：<%=totalMoney.toFixed(2)%>，未结算平均消费：<%=(totalMoney/userMoney.length).toFixed(2)%></span><br/>
+		<%var j = 0;%>
+		<%var aveMoney = (totalMoney/userMoney.length).toFixed(2);%>
+		<span><%userMoney.forEach(function(item){%>
+			<%var itemMoney = item.money.toFixed(2);%>
+			<%var minus = itemMoney - aveMoney;%>
+			<%if(j != 0){%>，<%}%><%=item.name%>：<%=item.money.toFixed(2)%>
+			<%if(minus.toFixed(2) > 0){%>
+				(<span class="glyphicon glyphicon-arrow-up colorGreen" aria-hidden="true"></span>
+				<%= minus.toFixed(2)%>)
+			<%}else if(minus.toFixed(2) < 0){%>
+				(<span class="glyphicon glyphicon glyphicon-arrow-down colorRed" aria-hidden="true"></span>
+				<%= -minus.toFixed(2)%>)
+			<%}else if(minus.toFixed(2) == 0){%>
+				(<span class="glyphicon glyphicon-log-minus colorBlue" aria-hidden="true"></span>
+				<%= minus.toFixed(2)%>)
+			<%}%>
+			<%j++;%>
+			<%})%></span>
+	</div>
+	<div class="text-right">
+		<span style="color:#999;">共<%=page.totalPage%>条 | 每页显示<%=page.pageSize%>条 | 共<%=page.getTotalPage()%>页</span>
+	</div>
+	<div class="text-right">
+		<nav aria-label="Page navigation">
+		<ul class="pagination">
+		</ul>
+	</nav>
+</div>
+<%if(session.userid == createId){%>
+	<div class="text-center">
+			<button type="button" class="btn btn-primary balanceToToday">结算至今日</button>	
+		</div>
+	</div>
+<%}%>
+<% include footer.ejs %>
